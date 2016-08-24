@@ -1,6 +1,5 @@
 package me.tomify.historicalmarkersnearby;
 
-import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
@@ -12,6 +11,8 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
     private Double latitude;
@@ -31,24 +32,28 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         } catch(Exception e) {
             System.out.println("Erroring");
             System.out.println(e.getMessage());
-            ActivityCompat.requestPermissions(this, new String[] { android.Manifest.permission.ACCESS_COARSE_LOCATION }, 0);
+            String[] permissions = new String[] { android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION };
+            ActivityCompat.requestPermissions(this, permissions, 0);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            requestLocation();
+            try {
+                requestLocation();
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } else {
+            System.out.println("Permission Denied");
         }
     }
 
     private void requestLocation() {
-        System.out.println("Requesting");
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
-        criteria.setPowerRequirement(Criteria.POWER_LOW);
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationManager.requestSingleUpdate(criteria, this, null);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
     }
 
     public void nearbyButtonClick(View view) {
