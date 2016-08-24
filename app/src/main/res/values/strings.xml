@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HistoricalMarkersNearby</string>
+    <string name="app_name">HMdb Nearby</string>
     <string name="heading">Historical Markers Nearby</string>
     <string name="subheading">Bite-Size Bits of Local, National, and Global History</string>
     <string name="button">Go</string>
