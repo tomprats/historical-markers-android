@@ -10,19 +10,24 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements LocationListener {
     private Double latitude;
     private Double longitude;
 
+    public void nearbyButtonClick(View view) {
+        String url = "https://www.hmdb.org/map.asp?nearby=yes&Latitude=" + latitude + "&Longitude=" + longitude;
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(browserIntent);
+    }
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onStart() {
+        super.onStart();
         setContentView(R.layout.activity_main);
 
-        hideButton();
+        setState("loading");
         try {
             requestLocation();
         } catch(Exception e) {
@@ -35,20 +40,16 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         if(grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             requestLocation();
-        } // else Permission Denied
+        } else {
+            setState("Location Access Disabled");
+        }
     }
-
-    public void nearbyButtonClick(View view) {
-        String url = "https://www.hmdb.org/map.asp?nearby=yes&Latitude=" + latitude + "&Longitude=" + longitude;
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(browserIntent);
-   }
 
    @Override
     public void onLocationChanged(Location location) {
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        showButton();
+        setState("ready");
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationManager.removeUpdates(this);
    }
@@ -62,13 +63,24 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
     }
 
-    private void hideButton() {
-        Button button = (Button) findViewById(R.id.button);
-        button.setVisibility(View.GONE);
-    }
-
-    private void showButton() {
-        Button button = (Button) findViewById(R.id.button);
-        button.setVisibility(View.VISIBLE);
+    private void setState(String state) {
+        switch (state) {
+            case "loading":
+                findViewById(R.id.loadingIndicator).setVisibility(View.VISIBLE);
+                findViewById(R.id.button).setVisibility(View.GONE);
+                findViewById(R.id.errorMessage).setVisibility(View.GONE);
+                break;
+            case "ready":
+                findViewById(R.id.loadingIndicator).setVisibility(View.GONE);
+                findViewById(R.id.button).setVisibility(View.VISIBLE);
+                findViewById(R.id.errorMessage).setVisibility(View.GONE);
+                break;
+            default:
+                findViewById(R.id.loadingIndicator).setVisibility(View.GONE);
+                findViewById(R.id.button).setVisibility(View.GONE);
+                TextView errorMessage = (TextView) findViewById(R.id.errorMessage);
+                errorMessage.setVisibility(View.VISIBLE);
+                errorMessage.setText("Location Error: " + state);
+        }
     }
 }
