@@ -17,7 +17,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private Double longitude;
 
     public void nearbyButtonClick(View view) {
-        String url = "https://www.hmdb.org/map.asp?nearby=yes&Latitude=" + latitude + "&Longitude=" + longitude;
+        String version = BuildConfig.VERSION_NAME;
+        String url = "https://www.hmdb.org/map.asp?nearby=yes&latitude=" + latitude + "&longitude=" + longitude + "&nearest=10&source=app-android-" + version;
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
         startActivity(browserIntent);
     }
